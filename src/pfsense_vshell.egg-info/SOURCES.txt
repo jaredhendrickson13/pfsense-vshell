@@ -1,0 +1,8 @@
+pfsense-vshell
+setup.py
+pfsense_vshell.egg-info/PKG-INFO
+pfsense_vshell.egg-info/SOURCES.txt
+pfsense_vshell.egg-info/dependency_links.txt
+pfsense_vshell.egg-info/requires.txt
+pfsense_vshell.egg-info/top_level.txt
+pfvlib/__init__.py
