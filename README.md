@@ -9,7 +9,7 @@ pfSense vShell requires Python3/Pip3 for installation<br>
 To install:<br>
 `pip3 install pfsense-vshell` 
 
-To uninstall:
+To uninstall:<br>
 `pip3 uninstall pfsense-vshell`
 
 # Examples
@@ -46,7 +46,7 @@ $ pfsense-vshell 127.0.0.1 --command "pkg install -y pfSense-pkg-nmap" -u admin 
 
 5: Display pfSense vShell version
 ```shell script
-$ pfsense-vshell 127.0.0.1 --version
+$ pfsense-vshell --version
 pfsensevshell v0.0.1 Darwin/x86_64
 ```
 # Restrictions
