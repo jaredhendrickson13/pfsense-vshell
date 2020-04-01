@@ -50,9 +50,14 @@ $ pfsense-vshell --version
 pfsensevshell v0.0.1 Darwin/x86_64
 ```
 # Restrictions
-- Interactive commands cannot be run within pfSense vShell. There is no way to redirect `stdin` to command beyond the 
-initial command arguments, these commands will typically timeout
-- Some older versions (pre-2.3) may not work properly. Always test functionality for running against production systems
-
+- Interactive commands cannot be run within pfSense vShell, there is no way to add additional input after you have run 
+your command. If the command does not return a return code within 90 seconds the command will timeout.
+- Some older versions (pre-2.3) may not work properly. Always test functionality for running against production systems.
+- Virtual shell sessions will automatically close after 90 seconds of non-activity. The timeout timer will reset after
+every command input.
+- By default, you are placed in the webConfigurator's web-root directory (/usr/local/www/). You cannot change directories.
+Any file interaction will be relative to this directory if not absolute.
+- By default, any command run within pfSense vShell has root access. There is no way to change this so be careful.
+- Your pfSense user must have access to the Diagnostics > Command Prompt page within the webConfigurator.
 
 
