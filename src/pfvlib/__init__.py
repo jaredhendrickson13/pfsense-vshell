@@ -17,7 +17,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # Disable u
 # CLASSES #
 # PfaVar is a class of variables shared between different Python scripts
 class PfaVar:
-    software_version = "v0.0.1 " + platform.system() + "/" + platform.machine()    # Define our current version of this software
+    v_tag = "1.0.0_1"    # Set the version tag, this should be the single source for version number
+    software_version = "v" + v_tag + " " + platform.system() + "/" + platform.machine()    # Software version header
     local_user = getpass.getuser()  # Save our current user's username to a string
     local_hostname = socket.gethostname()  # Gets the hostname of the system running pfsense-vshell
     current_date = datetime.datetime.now().strftime("%Y%m%d%H%M%S")  # Get the current date in a file supported format
