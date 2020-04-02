@@ -10,6 +10,7 @@ setup(
     author='Jared Hendrickson',
     author_email='jaredhendrickson13@gmail.com',
     url="https://github.com/jaredhendrickson13/pfsense-vshell",
+    license="Apache-2.0",
     packages=['pfvlib'],
     description="A command line tool to run remote shell commands on pfSense without SSH",
     long_description=read_me(),
