@@ -1,5 +1,5 @@
 from setuptools import setup
-from pfvshell import PFClient
+from pfsense_vshell import PFClient
 
 def read_me():
     with open('README.md') as f:

@@ -4,32 +4,195 @@
 # Copyright 2020 - Jared Hendrickson
 # ----------------------------------------------------------------------------------------------------------------
 
+# IMPORT MODULES #
 import argparse
-import pfvshell
+import sys
+import time
+import pfsense_vshell
+
 
 class PFCLI:
     def __init__(self):
+        self.__parse_args__()
+        self.client = pfsense_vshell.PFClient(
+            self.args.host,
+            username=self.args.username,
+            password=self.args.password,
+            scheme=self.args.scheme,
+            port=self.args.port,
+            verify=self.args.verify,
+            timeout=self.args.timeout
+        )
+        self.__run__()
+
+    def command(self):
+        print(self.client.run_command(self.args.command))
+        self.exit(0)
+
+    def virtual_shell(self):
+        if self.client.authenticate():
+            print("---Virtual shell established---")
+
+            # Loop input to simulate an interactive shell
+            while True:
+                start_time = time.time()  # Track the time when the loop starts
+                cmd = input(self.client.username + "@" + self.client.host + ":/usr/local/www $ ")
+                end_time = time.time()  # Track the time after input was received
+                elapsed_time = end_time - start_time  # Determine the elapsed time
+
+                # Check if our virtual session has timed out
+                if elapsed_time > 180 or 0 > elapsed_time:
+                    print("---Virtual shell timeout---")
+                    self.exit(0)
+                # Check if user typed "close" indicating they wish to end the virtual shell
+                elif cmd.lower() in ["close", "exit", "quit"]:
+                    print("---Virtual shell terminated---")
+                    sys.exit(0)
+                # Check for unsupported commands
+                elif self.__command_override__(cmd):
+                    print(self.__command_override__(cmd))
+                # Run our command if it is not blank
+                elif cmd not in ["", None, " "]:
+                    print(self.client.run_command(cmd))
+                    self.verbose()
+                    self.client.log.clear()
+
+    def version(self):
+        print("pfsense-vshell v" + self.client.version())
+        sys.exit(0)
+
+    def verbose(self):
+        if self.args.verbose:
+            print("\n".join(self.client.log))
+
+    def exit(self, code):
+        self.verbose()
+        sys.exit(code)
+
+    def __run__(self):
+        # Check for the presence of the --version flag
+        if self.args.version:
+            self.version()
+        # Check for the presence of the --command flag
+        elif self.args.command:
+            try:
+                self.command()
+            except pfsense_vshell.PFError as error:
+                print("Error: " + error.message)
+                self.exit(error.code)
+        # Check for the presence of the --virtual-shell flag
+        elif self.args.shell:
+            try:
+                self.virtual_shell()
+            except pfsense_vshell.PFError as error:
+                print("Error: " + error.message)
+                self.exit(error.code)
+
+    def __parse_args__(self):
+        # Custom port type for argparse
+        def port(value_string):
+            value = int(value_string)
+            if value not in range(1, 65535):
+                raise argparse.ArgumentTypeError("%s is out of range, choose from [1-65535]" % value)
+            return value
+
+        # Custom timeout type for argparse
+        def timeout(value_string):
+            value = int(value_string)
+            if value not in range(0, 120):
+                raise argparse.ArgumentTypeError("%s is out of range, choose from [0-120]" % value)
+            return value
+
         parser = argparse.ArgumentParser(description='Run shell commands on pfSense without SSH')
         parser.prog = "pfsense-vshell"
         parser.add_argument(
-            '--username', "-u",
-            dest="username",
+            '--host', '-i',
+            dest="host",
+            required=True,
+            help="Specify the IP or hostname of the remote pfSense host"
+        )
+        parser.add_argument(
+            "--virtual-shell", "-s",
+            dest="shell",
+            action="store_true",
+            help="Start an interactive virtual shell"
+        )
+        parser.add_argument(
+            "--command", "-c",
+            dest="command",
             required=False,
-            help='Set the username to use when authenticating',
+            help="Specify a single command to run"
         )
         parser.add_argument(
             '--username', "-u",
             dest="username",
-            required=False,
+            required=True,
             help='Set the username to use when authenticating',
         )
         parser.add_argument(
             '--password', "-p",
             dest="password",
-            required=False,
+            required=True,
             help='Set the password to use when authenticating',
+        )
+        parser.add_argument(
+            '--scheme',
+            dest="scheme",
+            choices=["http", "https"],
+            default="https",
+            help='Set the HTTP protocol to use when connecting',
+        )
+        parser.add_argument(
+            "--port",
+            dest="port",
+            type=port,
+            default=443,
+            help="Set the TCP port of the remote pfSense webConfigurator"
+        )
+        parser.add_argument(
+            "--timeout", "-t",
+            dest="timeout",
+            type=timeout,
+            default=30,
+            help="Set connection timeout value"
+        )
+        parser.add_argument(
+            "--no_verify", "-k",
+            dest="verify",
+            action="store_false",
+            help="Disable certificate verification"
+        )
+        parser.add_argument(
+            "--version", "-V",
+            dest="version",
+            action="store_true",
+            help="Print version data"
+        )
+        parser.add_argument(
+            "--verbose", "-v",
+            dest="verbose",
+            action="store_true",
+            help="Print verbose data"
         )
 
         self.args = parser.parse_args()
 
-PFCLI()
+    def __command_override__(self, command):
+        cmd_list = (command + " ").split(" ")
+
+        # Create a dictionary of responses for certain commands
+        cmd_dict = {
+            "cd": "Error: directory traversal is not allowed",
+            "sudo": "Error: privilege escalation is not allowed",
+            "su": "Error: user switching is not allowed",
+            "history": "\n".join(self.client.history)
+        }
+
+        return cmd_dict.get(cmd_list[0], None)
+
+
+try:
+    PFCLI()
+except (KeyboardInterrupt, EOFError):
+    print("\n---Virtual shell terminated---")
+    sys.exit(0)
