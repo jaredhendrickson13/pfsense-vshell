@@ -1,5 +1,5 @@
 from setuptools import setup
-from pfvlib import PfaVar
+from pfvshell import PFClient
 
 def read_me():
     with open('README.md') as f:
@@ -11,11 +11,10 @@ setup(
     author_email='jaredhendrickson13@gmail.com',
     url="https://github.com/jaredhendrickson13/pfsense-vshell",
     license="Apache-2.0",
-    packages=['pfvlib'],
     description="A command line tool to run remote shell commands on pfSense without SSH",
     long_description=read_me(),
     long_description_content_type="text/markdown",
-    version=PfaVar.v_tag,
+    version=PFClient.version(),
     scripts=['pfsense-vshell'],
     install_requires=[
            "requests",
