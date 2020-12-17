@@ -54,7 +54,7 @@ class PFClient:
         Provides the current version of pfsense vShell
         :return: (string) the current pfSense vShell version
         """
-        return "2.0.1"
+        return "2.0.2"
 
     def url(self):
         """
@@ -103,7 +103,7 @@ class PFClient:
             self.__log__("request", str(ssl_error))
             self.__get_error__(11)
         except requests.exceptions.ConnectionError as connection_error:
-            self.__log__("request", connection_error)
+            self.__log__("request", str(connection_error))
             self.__get_error__(12)
 
     def authenticate(self):
