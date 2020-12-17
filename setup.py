@@ -30,7 +30,7 @@ setup(
     long_description=read_me(),
     long_description_content_type="text/markdown",
     version="2.0.1",
-    scripts=['pfsense-vshell'],
+    scripts=['scripts/pfsense-vshell'],
     packages=["pfsense_vshell"],
     install_requires=[
            "requests",
