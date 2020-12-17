@@ -1,8 +1,17 @@
 #!/usr/bin/python3
-# ----------------------------------------------------------------------------------------------------------------
-# Author: Jared Hendrickson
-# Copyright 2020 - Jared Hendrickson
-# ----------------------------------------------------------------------------------------------------------------
+# Copyright 2020 Jared Hendrickson
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
 
 # IMPORT MODULES #
 import argparse
@@ -40,7 +49,7 @@ class PFCLI:
 
     def virtual_shell(self):
         """
-        Our --virtual-shell flag function. Starts an interactive virtual shell.
+        Our --virtual_shell flag function. Starts an interactive virtual shell.
         :return: (none) prompts user for command inputs and prints command outputs when successful
         """
 
@@ -118,7 +127,7 @@ class PFCLI:
             except pfsense_vshell.PFError as error:
                 print("pfsense-vshell: error: " + error.message)
                 self.exit(error.code)
-        # Run the virtual_shell function if the --virtual-shell flag is present
+        # Run the virtual_shell function if the --virtual_shell flag is present
         elif self.args.shell:
             try:
                 self.virtual_shell()
@@ -127,7 +136,7 @@ class PFCLI:
                 self.exit(error.code)
         # Otherwise, the action was unrecognized
         else:
-            actions = " ".join(["'--virtual-shell'", "'--command'", "'--help'", "'--version'"])
+            actions = " ".join(["'--virtual_shell'", "'--command'", "'--help'", "'--version'"])
             print("pfsense-vshell: error: no action requested (choose from " + actions + ")")
 
     def __command_override__(self, command):
@@ -192,7 +201,7 @@ class PFCLI:
             help="Specify the IP or hostname of the remote pfSense host"
         )
         parser.add_argument(
-            "--virtual-shell", "-s",
+            "--virtual_shell", "-s",
             dest="shell",
             action="store_true",
             help="Start an interactive virtual shell"
