@@ -82,9 +82,9 @@ Any file interaction will be relative to this directory if not absolute.
 - Your pfSense user must have access to the Diagnostics > Command Prompt page within the webConfigurator.
 
 # Python3 Module
+After installing the package, the `pfsense_vshell` module will also be made available to your Python3 scripts.
 
-Classes
--------
+## Classes
 ```
 PFClient(host, username, password, port=443, scheme='https', timeout=30, verify=True)
 :   Initializes the object at creation
@@ -147,4 +147,15 @@ PFError(code, message)
 
     * builtins.Exception
     * builtins.BaseException
+```
+
+## Examples
+```python
+import pfsense_vshell
+
+# Create our PFClient object
+vshell = pfsense_vshell.PFClient("127.0.0.1", username="admin", password="password")
+
+# Run command to install package on pfSense
+vshell.run_command("pkg install -y pfSense-pkg-sudo")
 ```
