@@ -2,168 +2,273 @@
 # ----------------------------------------------------------------------------------------------------------------
 # Author: Jared Hendrickson
 # Copyright 2020 - Jared Hendrickson
-# Purpose: This script is intended to add a CLI interface for pfSense devices. This uses cURL libraries to execute
-# pfSense's many PHP configuration scripts. All functions in this script mimic changes regularly made in a browser
-# and utilizes pfSense's built-in CSRF checks, input validation, and configuration parsing
 # ----------------------------------------------------------------------------------------------------------------
+
 # IMPORT MODULES #
-from pfvlib import *
+import argparse
+import sys
 import time
-import signal
-import os
-
-# VARIABLES #
-arg_1 = sys.argv[1] if len(sys.argv) > 1 else ""    # Our first command line argument
-arg_2 = sys.argv[2] if len(sys.argv) > 2 else ""    # Our second command line argument
-arg_3 = sys.argv[3] if len(sys.argv) > 3 else None    # Our third command line argument
-arg_4 = sys.argv[4] if len(sys.argv) > 4 else None    # Our fourth command line argument
-arg_5 = sys.argv[5] if len(sys.argv) > 5 else None    # Our fifth command line argument
-arg_6 = sys.argv[6] if len(sys.argv) > 6 else None    # Our sixth command line argument
-arg_7 = sys.argv[7] if len(sys.argv) > 7 else None    # Our seventh command line argument
-vshell_session = False    # Create a tracker to determine if shell is established
-# Create a dictionary of responses for certain commands
-cmd_dict = {
-    "": None,
-    "cd": "Error: directory traversal is not allowed",
-    "sudo": "Error: privilege escalation is not allowed",
-    "su": "Error: user switching is not allowed"
-}
+import pfsense_vshell
 
 
-# FUNCTIONS #
-# no_escape() Prevents SIGINT from killing the script unsafely
-def no_escape(signum, frame):
-    try:
-        print("\n---Virtual shell terminated---") if vshell_session else print("")
-        os._exit(0)
-    except OSError:
-        print("\n---Virtual shell terminated---") if vshell_session else print("")
+class PFCLI:
+    def __init__(self):
+        """
+        Initializes the object at creation by converting arguments intto our PFClient object and running our CLI
+        """
+        self.shell_established = False
+        self.__parse_args__()
+        self.client = pfsense_vshell.PFClient(
+            self.args.host,
+            username=self.args.username,
+            password=self.args.password,
+            scheme=self.args.scheme,
+            port=self.args.port,
+            verify=self.args.verify,
+            timeout=self.args.timeout
+        )
+        self.__run__()
+
+    def command(self):
+        """
+        Our --command flag function. Runs a single command and exits script.
+        :return: (none) prints command output if successful
+        """
+
+        print(self.client.run_command(self.args.command))
+        self.exit(0)
+
+    def virtual_shell(self):
+        """
+        Our --virtual-shell flag function. Starts an interactive virtual shell.
+        :return: (none) prompts user for command inputs and prints command outputs when successful
+        """
+
+        # Only start a virtual shell if no errors were found
+        if not self.client.__has_host_errors__():
+            self.shell_established = True
+            print("---Virtual shell established---")
+
+            # Loop input to simulate an interactive shell
+            while True:
+                # Save start time, wait for command input, capture time after input, calculate time elapsed
+                start_time = time.time()
+                cmd = input(self.client.username + "@" + self.client.host + ":/usr/local/www $ ")
+                end_time = time.time()
+                elapsed_time = end_time - start_time
+
+                # Check if our virtual session has timed out waiting for a command input, no timeout if 0
+                if self.args.shell_timeout != 0 and (elapsed_time > self.args.shell_timeout or 0 > elapsed_time):
+                    print("---Virtual shell timeout---")
+                    self.exit(0)
+                # Check if user typed command indicating they wish to end the virtual shell
+                elif cmd.lower() in ["close", "exit", "quit"]:
+                    print("---Virtual shell terminated---")
+                    sys.exit(0)
+                # Check for unsupported commands/command overrides
+                elif self.__command_override__(cmd):
+                    print(self.__command_override__(cmd))
+                # Run our command if it is not blank, restarts loop if condition is not met
+                elif cmd not in ["", None, " "]:
+                    print(self.client.run_command(cmd))
+                    self.verbose()
+                    self.client.log.clear()
+
+    def version(self):
+        """
+        Our --version flag function. Prints the current pfsense-vshell version and exits script.
+        :return:
+        """
+
+        print("pfsense-vshell v" + self.client.version())
         sys.exit(0)
 
+    def verbose(self):
+        """
+        Our --verbose flag function. Prints verbose logging information.
+        :return:
+        """
 
-# main() is the primary function that maps arguments to other functions
-def main():
-    # Local Variables
-    signal.signal(signal.SIGINT, no_escape)    # Override default keyboard interrupt on sigint
-    pfsense_server = parse_url(arg_1)    # Parse our server URL
-    pfsense_action = filter_input(arg_2)    # Save our command option
+        if self.args.verbose:
+            print("\n".join(self.client.log))
 
-    # Check if we are simply requesting the software version
-    if arg_1.upper() in ("--VERSION", "-V"):
-        print(get_exit_message("version", "", "generic", "", ""))
-        sys.exit(0)
+    def exit(self, code):
+        """
+        Exits the script. If verbose mode was enabled, verbose logs are printed beforehand.
+        :param code: (int) the code to exit on
+        :return: (none)
+        """
 
-    # Check if we are simply requesting the software help page
-    if "--help" in sys.argv or "-h" in sys.argv or "?" in sys.argv:
-        print_help_page()
-        sys.exit(0)
+        self.verbose()
+        sys.exit(code)
 
-    # Check that user passed in an IP or hostname
-    if pfsense_server is not "":
-        # Check if the pfSense server is available for connections
-        if check_remote_port(pfsense_server, PfaVar.wc_protocol_port):
-            # START COMMAND FLAGS
-            # Assign functions for --SHELL
-            if pfsense_action == "--virtual-shell" or pfsense_action == "-s":
-                # Action variables
-                global vshell_session
-                pfsense_action = "--virtual-shell"    # Assert the full cmd name
-                v_shell_timeout = 180    # Set the amount of time before our virtual shell session times out
-                # Save crednetials if passed in as arguments, otherwise prompt for credentials
-                user = arg_4 if arg_3 == "-u" and arg_4 is not None else input("Please enter username: ")
-                key = arg_6 if arg_5 == "-p" and arg_6 is not None else getpass.getpass("Please enter password: ")
-                # INTERACTIVE MODE/VIRTUAL SHELL
-                if check_auth(pfsense_server, user, key):
-                    print("---Virtual shell established---")
-                    vshell_session = True
-                    # Loop input to simulate an interactive shell
-                    while True:
-                        start_time = time.time()    # Track the time when the loop starts
-                        cmd = input(user + "@" + pfsense_server + ":/usr/local/www $ ")    # Input shell commands
-                        cmd_list = (cmd + " ").split(" ")    # Split command into list upon space
-                        end_time = time.time()    # Track the time after input was received
-                        elapsed_time = end_time - start_time    # Determine the elapsed time
-                        # Check if user typed "close" indicating they wish to end the virtual shell
-                        if cmd.lower() in ["close", "exit", "quit"]:
-                            print("---Virtual shell terminated---")
-                            sys.exit(0)
-                        # Check if our virtual session has timed out
-                        elif elapsed_time > v_shell_timeout or 0 > elapsed_time:
-                            print("---Virtual shell timeout---")
-                            sys.exit(0)
-                        # Check for unsupported commands
-                        elif cmd_list[0] in cmd_dict.keys():
-                            # Only print a message if there is one to print
-                            if cmd_dict[cmd_list[0]] is not None:
-                                print(cmd_dict[cmd_list[0]])
-                        # If input is valid, submit the command to pfSense
-                        else:
-                            cmd_exec = get_shell_output(pfsense_server, user, key, cmd)    # Run command
-                            # Check if our command executed successfully, if so print response and decode HTML
-                            if cmd_exec["ec"] == 0:
-                                print(cmd_exec["shell_output"]) if cmd_exec["shell_output"] != "" else None
-                            # If our command was not successful, print error
-                            else:
-                                print(get_exit_message(2, pfsense_server, pfsense_action, cmd, ""))
-                # If authentication failed, print error and exit on non-zero
-                else:
-                    print(get_exit_message(3, pfsense_server, pfsense_action, "", ""))
-                    sys.exit(3)
+    def __run__(self):
+        """
+        Determines which actions to run based on the command line arguments passed in
+        :return: (none)
+        """
 
-            # --COMMAND flag
-            elif pfsense_action == "--command" or pfsense_action == "-c":
-                # Save crednetials if passed in as arguments, otherwise prompt for credentials
-                shell_cmd = arg_3 if arg_3 is not None else ""    # Get shell cmd
-                user = arg_5 if arg_4 == "-u" and arg_5 is not None else input("Please enter username: ")
-                key = arg_7 if arg_6 == "-p" and arg_7 is not None else getpass.getpass("Please enter password: ")
-                cmd_exec = get_shell_output(pfsense_server, user, key, shell_cmd)  # Run our command
-                pfsense_action = "--command"    # Assert the full cmd name
-                # Check auth first
-                if check_auth(pfsense_server, user, key):
-                    # Check if our command ran successfully, if so print our output
-                    if cmd_exec["ec"] == 0:
-                        print(cmd_exec["shell_output"])
-                        sys.exit(0)
-                    # If our command did not run successfully, print our error and exit on non-zero
-                    else:
-                        print(get_exit_message(cmd_exec["ec"], pfsense_server, pfsense_action, shell_cmd, ""))
-                        sys.exit(cmd_exec["ec"])
-
-            # CHECK AUTH MODE
-            elif pfsense_action == "--check-auth":
-                # Print warning before checking authentication, then gather credentials
-                print("Warning: Large numbers of failed auth attempts may result in lockout. Please use caution.")
-                user = arg_4 if arg_3 == "-u" and arg_4 is not None else input("Please enter username: ")
-                key = arg_6 if arg_5 == "-p" and arg_6 is not None else getpass.getpass("Please enter password: ")
-                auth_check = check_auth(pfsense_server, user, key)    # Check our authentication
-                # Print return message and return exit code
-                if auth_check:
-                    print(get_exit_message("success", "", pfsense_action, "", ""))
-                else:
-                    print(get_exit_message("fail", "", pfsense_action, "", ""))
-                    sys.exit(1)
-
-            # If an unexpected action was given, return error
-            else:
-                print_help_page()
-                print(get_exit_message("invalid_arg", pfsense_server, "generic", pfsense_action, ""))
-                sys.exit(1)
-
-        # If we couldn't connect to pfSense's web configurator, return error
+        # Run the version function if the --version flag is present
+        if self.args.version:
+            self.version()
+        # Run the command function if the --command flag is present
+        elif self.args.command:
+            try:
+                self.command()
+            except pfsense_vshell.PFError as error:
+                print("pfsense-vshell: error: " + error.message)
+                self.exit(error.code)
+        # Run the virtual_shell function if the --virtual-shell flag is present
+        elif self.args.shell:
+            try:
+                self.virtual_shell()
+            except pfsense_vshell.PFError as error:
+                print("pfsense-vshell: error: " + error.message)
+                self.exit(error.code)
+        # Otherwise, the action was unrecognized
         else:
-            print(get_exit_message("connect_err", pfsense_server, "generic", pfsense_action, ""))
-            sys.exit(1)
-    # If user did not pass in a hostname or IP, print help screen
-    else:
-        # Print our error and exit
-        print_help_page()
-        print(get_exit_message("invalid_host", "", "generic", "", ""))
-        sys.exit(1)
+            actions = " ".join(["'--virtual-shell'", "'--command'", "'--help'", "'--version'"])
+            print("pfsense-vshell: error: no action requested (choose from " + actions + ")")
+
+    def __command_override__(self, command):
+        """
+        Checks if the command executable being requested needs to be overridden. This is necessary for executables that
+        may be dangerous or unsupported by pfSense's diag_command.php page.
+        :param command: (string) the full command being requested
+        :return: (string or none) the overridden command response string, or none if command does not require override
+        """
+
+        cmd_list = (command + " ").split(" ")
+
+        # Create a dictionary of responses for certain commands
+        cmd_dict = {
+            "cd": "pfsense-vshell: error: directory traversal is not allowed",
+            "sudo": "pfsense-vshell: error: privilege escalation is not allowed",
+            "su": "pfsense-vshell: error: user switching is not allowed",
+            "history": "\n".join(self.client.history)
+        }
+
+        return cmd_dict.get(cmd_list[0], None)
+
+    def __parse_args__(self):
+        """
+        Sets criteria for arguments and parses them into our args property
+        :return: (none) args property will be populated after running
+        """
+
+        def port(value_string):
+            """
+            Custom port type to be used by argparse module. This validates that an argument value is a valid TCP port.
+            This is intended to be used by argparse's add_argument method's type parameter only.
+            :param value_string: (string) the value to validated
+            :return: (int) the validated port integer
+            """
+
+            value = int(value_string)
+            if value not in range(1, 65535):
+                raise argparse.ArgumentTypeError("%s is out of range, choose from [1-65535]" % value)
+            return value
+
+        def timeout(value_string):
+            """
+            Custom timeout type to be used by argparse module. This validates that an argument value is within range.
+            This is intended to be used by argparse's add_argument method's type parameter only.
+            :param value_string: (string) the value to validated
+            :return: (int) the validated timeout integer
+            """
+
+            value = int(value_string)
+            if value not in range(0, 120):
+                raise argparse.ArgumentTypeError("%s is out of range, choose from [0-120]" % value)
+            return value
+
+        # Setup parser and define arguments
+        parser = argparse.ArgumentParser(description='Run shell commands on pfSense without SSH')
+        parser.prog = "pfsense-vshell"
+        parser.add_argument(
+            '--host', '-i',
+            dest="host",
+            required=False if "--version" in sys.argv or "-V" in sys.argv else True,
+            help="Specify the IP or hostname of the remote pfSense host"
+        )
+        parser.add_argument(
+            "--virtual-shell", "-s",
+            dest="shell",
+            action="store_true",
+            help="Start an interactive virtual shell"
+        )
+        parser.add_argument(
+            "--command", "-c",
+            dest="command",
+            required=False,
+            help="Specify a single command to run"
+        )
+        parser.add_argument(
+            '--username', "-u",
+            dest="username",
+            required=False if "--version" in sys.argv or "-V" in sys.argv else True,
+            help='Set the username to use when authenticating',
+        )
+        parser.add_argument(
+            '--password', "-p",
+            dest="password",
+            required=False if "--version" in sys.argv or "-V" in sys.argv else True,
+            help='Set the password to use when authenticating',
+        )
+        parser.add_argument(
+            '--scheme', '-w',
+            dest="scheme",
+            choices=["http", "https"],
+            default="https",
+            help='Set the HTTP protocol to use when connecting',
+        )
+        parser.add_argument(
+            "--port", "-P",
+            dest="port",
+            type=port,
+            default=443,
+            help="Set the TCP port of the remote pfSense webConfigurator"
+        )
+        parser.add_argument(
+            "--timeout", "-t",
+            dest="timeout",
+            type=timeout,
+            default=30,
+            help="Set connection timeout value"
+        )
+        parser.add_argument(
+            "--shell_timeout", "-z",
+            dest="shell_timeout",
+            type=timeout,
+            default=180,
+            help="Set session timeout value for virtual shell"
+        )
+        parser.add_argument(
+            "--no_verify", "-k",
+            dest="verify",
+            action="store_false",
+            help="Disable certificate verification"
+        )
+        parser.add_argument(
+            "--version", "-V",
+            dest="version",
+            action="store_true",
+            help="Print version data"
+        )
+        parser.add_argument(
+            "--verbose", "-v",
+            dest="verbose",
+            action="store_true",
+            help="Print verbose data"
+        )
+
+        self.args = parser.parse_args()
 
 
-# RUN TIME #
-# Execute main function
-main()
-
-# If nothing forced us to exit the script, return exit code 0
-sys.exit(0)
+# RUNTIME
+# Run the CLI, allow user to trigger KeyboardInterrupt (ctl + c) or EOFError (ctl + d) to safely exit the script
+try:
+    PFCLI()
+except (KeyboardInterrupt, EOFError):
+    print("\n---Virtual shell terminated---")
+    sys.exit(0)
