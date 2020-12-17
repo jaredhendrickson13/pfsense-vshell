@@ -16,6 +16,7 @@ setup(
     long_description_content_type="text/markdown",
     version=PFClient.version(),
     scripts=['pfsense-vshell'],
+    packages=["pfsense_vshell"],
     install_requires=[
            "requests",
            "urllib3"

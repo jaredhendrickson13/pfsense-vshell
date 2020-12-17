@@ -4,3 +4,4 @@ build*
 *__pycache__*
 *pfsense_vshell.egg*
 dist*
+venv*

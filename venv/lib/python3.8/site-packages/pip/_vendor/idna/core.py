@@ -1,8 +1,9 @@
-from . import idnadata
 import bisect
-import unicodedata
 import re
 import sys
+import unicodedata
+
+from . import idnadata
 from .intranges import intranges_contain
 
 _virama_combining_class = 9

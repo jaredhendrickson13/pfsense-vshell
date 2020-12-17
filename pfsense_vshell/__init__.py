@@ -63,7 +63,7 @@ class PFClient:
         :return: (string) output of the shell command
         """
 
-        self.__check_host_errors__()
+        self.__has_host_errors__()
         payload = {"__csrf_magic": self.get_csrf_token("/diag_command.php"), "txtCommand": cmd, "submit": "EXEC"}
         req = self.request("/diag_command.php", method="POST", data=payload)
         self.history.append(cmd)
@@ -182,10 +182,10 @@ class PFClient:
 
         return True if platform_confidence > 50 else False
 
-    def __check_host_errors__(self):
+    def __has_host_errors__(self):
         """
         Combines all host-based error checks into a single function.
-        :return: (None) a PFVError will be raised if an error was encountered
+        :return: (bool) returns true if no errors were, raises PFError if errors were found
         """
 
         # Ensure remote host is running pfSense
@@ -199,6 +199,8 @@ class PFClient:
         # Ensure we can authenticate
         elif not self.authenticate():
             self.__get_error__(3)
+
+        return False
 
     def __get_error__(self, code):
         """
