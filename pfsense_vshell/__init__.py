@@ -12,14 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+
 # IMPORT MODULES #
-import requests
-import html
-import urllib3
 import datetime
+import html
+import requests
+import urllib3
 
 
 class PFClient:
+    """Client object that facilitates controlling the virtual shell."""
+
     def __init__(self, host, username, password, port=443, scheme="https", timeout=30, verify=True):
         """
         Initializes the object at creation
@@ -81,6 +84,9 @@ class PFClient:
         if "<pre>" in req.text:
             return html.unescape(req.text.split("<pre>")[1].split("</pre>")[0])
 
+        # Return none if we were unable to locate the output
+        return None
+
     def request(self, uri, method="GET", data=None):
         """
         Makes HTTP requests on behalf of our object
@@ -105,6 +111,9 @@ class PFClient:
         except requests.exceptions.ConnectionError as connection_error:
             self.__log__("request", str(connection_error))
             self.__get_error__(12)
+
+        # Return none if we somehow land here
+        return None
 
     def authenticate(self):
         """
@@ -175,6 +184,7 @@ class PFClient:
         """
 
         resp = req.text if req else self.request("/").text
+
         platform_confidence = 0
 
         # List of platform dependent key words to check for
@@ -185,8 +195,8 @@ class PFClient:
             "csrfMagicToken", "/csrf/csrf-magic.js", "wizard.php", "/css/pfSense.css"
         ]
         # Loop through our list and add up a confidence score
-        for ci in check_items:
-            platform_confidence = platform_confidence + 10 if ci in resp else platform_confidence
+        for item in check_items:
+            platform_confidence = platform_confidence + 10 if item in resp else platform_confidence
 
         return True if platform_confidence > 50 else False
 
