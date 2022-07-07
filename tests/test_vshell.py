@@ -45,7 +45,9 @@ class TestVShell(unittest.TestCase):
 
         # Check if module correctly identifies non-pfSense host using a clone of the PFClient object
         non_pfsense_vshell = copy.deepcopy(self.vshell)
-        non_pfsense_vshell.host = "google.com"
+        non_pfsense_vshell.host = "example.com"
+        non_pfsense_vshell.port = 80
+        non_pfsense_vshell.scheme = "http"
         self.assertFalse(non_pfsense_vshell.is_host_pfsense())
 
     def test_run_command(self):
