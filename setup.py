@@ -29,7 +29,7 @@ setup(
     description="A command line tool to run remote shell commands on pfSense without SSH",
     long_description=read_me(),
     long_description_content_type="text/markdown",
-    version="2.0.2",
+    version="2.0.3",
     scripts=['scripts/pfsense-vshell'],
     packages=["pfsense_vshell"],
     install_requires=[

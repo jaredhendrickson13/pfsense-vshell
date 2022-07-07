@@ -57,7 +57,7 @@ class PFClient:
         Provides the current version of pfsense vShell
         :return: (string) the current pfSense vShell version
         """
-        return "2.0.2"
+        return "2.0.3"
 
     def url(self):
         """
