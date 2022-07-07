@@ -11,6 +11,7 @@ class TestVShell(unittest.TestCase):
     vshell = None
 
     def setUp(self):
+        """Define attributes required for test methods."""
         # Define the vshell attribute
         self.vshell = pfsense_vshell.PFClient(
             os.environ.get("PFSENSE_VSHELL_HOST", "localhost"),
@@ -62,3 +63,4 @@ class TestVShell(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

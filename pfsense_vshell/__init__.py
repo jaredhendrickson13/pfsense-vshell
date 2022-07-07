@@ -73,10 +73,14 @@ class PFClient:
         :param cmd: (string) a shell command to execute
         :return: (string) output of the shell command
         """
-
+        # Ensure there are no apparent issues with the target host.
         self.__has_host_errors__()
+
+        # Make our HTTP request.
         payload = {"__csrf_magic": self.get_csrf_token("/diag_command.php"), "txtCommand": cmd, "submit": "EXEC"}
         req = self.request("/diag_command.php", method="POST", data=payload)
+
+        # Write the command executed to the vShell history and log the action.
         self.history.append(cmd)
         self.__log__("run_command", cmd)
 
@@ -98,7 +102,9 @@ class PFClient:
 
         # Try to make our HTTP request, handle errors accordingly
         try:
-            req = self.session.request(method, self.url() + uri, data=data, timeout=self.timeout, verify=self.verify)
+            session = self.session
+            req = session.request(method, self.url() + uri, data=data, timeout=self.timeout, verify=self.verify)
+            session.close()
             self.last_request = req
             self.__log__("request", str(req.status_code) + " " + method + " " + uri)
             return req
@@ -121,7 +127,10 @@ class PFClient:
         :return: (bool) true if authentication was successful, false if it wasn't
         """
 
+        # Make an initial request to the initialize the CSRF checks.
         pre_auth_req = self.request("/index.php")
+
+        # Format our request payload include the valid CSRF token.
         payload = {
             "__csrf_magic": self.get_csrf_token("/index.php"),
             "usernamefld": self.username,
@@ -150,9 +159,9 @@ class PFClient:
         """
         Retrieves the current CSRF token for a page
         :param uri: (string) the URI (e.g. index.php) to retrieve the CSRF token from
-        :return: (string) the CSRF token
+        :return: (string) the valid CSRF token or empty string if no CSRF token was found
         """
-
+        # Initialize CSRF token attributes and make initial CSRF query.
         csrf_token_length = 55
         csrf_token = ""
         csrf_resp = self.request(uri, "GET")
@@ -163,7 +172,8 @@ class PFClient:
             csrf += csrf_resp.text.split("sid:")[1].split(";")[0].replace(" ", "").replace("\n", "").replace("\"", "")
             csrf_token = csrf if len(csrf) is csrf_token_length else ""
 
-        return csrf_token  # Return our token
+        # Return the valid CSRF token, or empty string if it could not be determined.
+        return csrf_token
 
     def has_dns_rebind_error(self, req=None):
         """
@@ -171,7 +181,7 @@ class PFClient:
         :param req: (object) optionally provide an existing Response object created by the requests module
         :return: (bool) true if a DNS rebind error was found, false if it wasn't
         """
-
+        # Make a preliminary request to check if a DNS Rebind error was detected by pfSense.
         resp = req.text if req else self.request("/").text
         return True if "Potential DNS Rebind attack detected" in resp else False
 
@@ -182,7 +192,7 @@ class PFClient:
         :param req: (object) optionally provide an existing Response object created by the requests module
         :return: (bool) true if the host is running pfSense, false if it is not
         """
-
+        # Make a preliminary request to check for keywords that indicate the target is running pfSense.
         resp = req.text if req else self.request("/").text
 
         platform_confidence = 0
