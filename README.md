@@ -16,7 +16,7 @@ To uninstall:<br>
 
 ## Usage & Syntax
 ```
-usage: pfsense-vshell [-h] --host HOST [--virtual_shell] [--command COMMAND] [--check_auth COMMAND] --username USERNAME --password PASSWORD [--scheme {http,https}] [--port PORT] [--timeout TIMEOUT] [--shell_timeout SHELL_TIMEOUT] [--no_verify] [--version] [--verbose]
+usage: pfsense-vshell [-h] --host HOST [--virtual_shell] [--command COMMAND] --username USERNAME --password PASSWORD [--scheme {http,https}] [--port PORT] [--timeout TIMEOUT] [--shell_timeout SHELL_TIMEOUT] [--no_verify] [--version] [--verbose]
 ```
 
 | Command         | Shorthand | Required                              | Description                                                                                    | Example Usage           |
@@ -65,7 +65,7 @@ $ pfsense-vshell --host 127.0.0.1 --command "pkg install -y pfSense-pkg-nmap" --
 5: Display pfSense vShell version
 ```shell script
 $ pfsense-vshell --version
-pfsense-vshell v2.0.0
+pfsense-vshell v2.0.3
 ```
 
 ## Notes
