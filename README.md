@@ -1,3 +1,7 @@
+[![PyPI](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/python-publish.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/python-publish.yml)
+[![CodeQL](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml)
+[![PyLint](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pylint.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pylint.yml)
+
 # Introduction
 pfSense vShell is a command line tool and Python module that enables users to remotely enter shell commands on a pfSense
 host without enabling `sshd`. This allows administrators to automate installation of packages, enable `sshd`, and make other backend
