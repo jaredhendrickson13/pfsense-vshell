@@ -11,13 +11,15 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+"""Sets up the pfsense-vshell package for distribution.s"""
 
 from setuptools import setup
 
 
 def read_me():
-    with open('README.md') as f:
-        return f.read()
+    """Reads the README.md for this repository to include in package distributions."""
+    with open('README.md', encoding="utf-8") as readme_file:
+        return readme_file.read()
 
 
 setup(
@@ -29,12 +31,13 @@ setup(
     description="A command line tool to run remote shell commands on pfSense without SSH",
     long_description=read_me(),
     long_description_content_type="text/markdown",
-    version="2.0.3",
+    version="2.0.4",
     scripts=['scripts/pfsense-vshell'],
     packages=["pfsense_vshell"],
     install_requires=[
-           "requests",
-           "urllib3"
+        "requests~=2.28.1",
+        "urllib3~=1.26.10",
+        "pylint~=2.14.5"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
