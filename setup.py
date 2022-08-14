@@ -13,16 +13,17 @@
 #    limitations under the License.
 """Sets up the pfsense-vshell package for distribution.s"""
 
-from setuptools import setup
-import os
 import codecs
+import os
+
+from setuptools import setup
 
 
 def read(rel_path):
     """Reads a specified file."""
     here = os.path.abspath(os.path.dirname(__file__))
-    with codecs.open(os.path.join(here, rel_path), 'r') as fp:
-        return fp.read()
+    with codecs.open(os.path.join(here, rel_path), 'r') as filepath:
+        return filepath.read()
 
 
 def get_version(rel_path):
@@ -44,8 +45,8 @@ def get_version(rel_path):
         if line.startswith('__version__'):
             delim = '"' if '"' in line else "'"
             return line.split(delim)[1] + revision
-    else:
-        raise RuntimeError("Unable to find version string.")
+
+    raise RuntimeError("Unable to find version string.")
 
 
 def get_readme():
