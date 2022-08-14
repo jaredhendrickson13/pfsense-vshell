@@ -37,7 +37,7 @@ def get_version(rel_path):
 
     # If a .devrevision file exists, this will append a development revision to the version
     if os.path.exists(".devrevision"):
-        revision = "+dev." + read(".devrevision").replace("\n", "")
+        revision = ".dev." + read(".devrevision").replace("\n", "")
         print(revision)
 
     # Otherwise, look for the version in the package.
