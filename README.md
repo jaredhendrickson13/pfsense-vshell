@@ -1,5 +1,4 @@
 [![PyPI](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pypi.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pypi.yml)
-[![Test PyPI](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/test-pypi.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/test-pypi.yml)
 [![PyLint](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pylint.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pylint.yml)
 [![CodeQL](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml)
 
