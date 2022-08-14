@@ -11,17 +11,20 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+"""Defines the client object used to establish virtual pfSense shell connections."""
+__version__ = "2.0.4"
 
-
-# IMPORT MODULES #
 import datetime
 import html
+
 import requests
 import urllib3
 
 
 class PFClient:
     """Client object that facilitates controlling the virtual shell."""
+    # Allow current number of instance attributes, they are needed to allow configurable connections
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host, username, password, port=443, scheme="https", timeout=30, verify=True):
         """
@@ -34,6 +37,8 @@ class PFClient:
         :param timeout: (int) the timeout value in seconds for HTTP requests. Defaults to 30.
         :param verify: (bool) true to enable certificate verification, false to disable. Defaults to true.
         """
+        # Allow current number of arguments, it does not affect readability
+        # pylint: disable=too-many-arguments
 
         # Set properties using parameters
         self.session = requests.Session()
@@ -57,7 +62,7 @@ class PFClient:
         Provides the current version of pfsense vShell
         :return: (string) the current pfSense vShell version
         """
-        return "2.0.3"
+        return __version__
 
     def url(self):
         """
@@ -146,14 +151,16 @@ class PFClient:
             if "username or Password incorrect" not in req.text and "class=\"fa fa-sign-out\"" in req.text:
                 self.__log__("authenticate", "success")
                 return True
-            elif "<p>One moment while the initial setup wizard starts." in req.text:
+            # Support first time logings where wizard is triggered
+            if "<p>One moment while the initial setup wizard starts." in req.text:
                 self.__log__("authenticate", "success")
                 return True
-            else:
-                self.__log__("authenticate", "failed")
-                return False
-        else:
-            return True
+            # Otherwise, assume authentication failed
+            self.__log__("authenticate", "failed")
+            return False
+
+        # Don't re-authenticate if we're already authenticated
+        return True
 
     def get_csrf_token(self, uri):
         """
@@ -183,7 +190,7 @@ class PFClient:
         """
         # Make a preliminary request to check if a DNS Rebind error was detected by pfSense.
         resp = req.text if req else self.request("/").text
-        return True if "Potential DNS Rebind attack detected" in resp else False
+        return "Potential DNS Rebind attack detected" in resp
 
     def is_host_pfsense(self, req=None):
         """
@@ -208,7 +215,7 @@ class PFClient:
         for item in check_items:
             platform_confidence = platform_confidence + 10 if item in resp else platform_confidence
 
-        return True if platform_confidence > 50 else False
+        return platform_confidence > 50
 
     def __has_host_errors__(self):
         """
@@ -259,10 +266,5 @@ class PFClient:
         self.log.append(",".join([str(datetime.datetime.utcnow()), self.url(), self.username, event, msg]))
 
 
-class PFError(Exception):
-    """
-    Error object used by the PFVShell class
-    """
-    def __init__(self, code, message):
-        self.code = code
-        self.message = message
+class PFError(BaseException):
+    """Error object used by the PFVShell class"""
