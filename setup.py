@@ -14,12 +14,43 @@
 """Sets up the pfsense-vshell package for distribution.s"""
 
 from setuptools import setup
+import os
+import codecs
 
 
-def read_me():
+def read(rel_path):
+    """Reads a specified file."""
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, rel_path), 'r') as fp:
+        return fp.read()
+
+
+def get_version(rel_path):
+    """
+    Gets the current version of the package. If a .devrevision file exists, the file will be read and appended to the
+    current package version. This is used to ensure the setup version can always be unique for PyPI dev builds
+    triggered by CI/CD workflows.
+    """
+    # Variables
+    revision = ""
+
+    # If a .devrevision file exists, this will append a development revision to the version
+    if os.path.exists(".devrevision"):
+        revision = "+dev." + read(".devrevision").replace("\n", "")
+        print(revision)
+
+    # Otherwise, look for the version in the package.
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1] + revision
+    else:
+        raise RuntimeError("Unable to find version string.")
+
+
+def get_readme():
     """Reads the README.md for this repository to include in package distributions."""
-    with open('README.md', encoding="utf-8") as readme_file:
-        return readme_file.read()
+    return read("README.md")
 
 
 setup(
@@ -28,10 +59,10 @@ setup(
     author_email='jaredhendrickson13@gmail.com',
     url="https://github.com/jaredhendrickson13/pfsense-vshell",
     license="Apache-2.0",
-    description="A command line tool to run remote shell commands on pfSense without SSH",
-    long_description=read_me(),
+    description="A command line tool to run remote shell commands on pfSense without SSH.",
+    long_description=get_readme(),
     long_description_content_type="text/markdown",
-    version="2.0.4",
+    version=get_version("pfsense_vshell/__init__.py"),
     scripts=['scripts/pfsense-vshell'],
     packages=["pfsense_vshell"],
     install_requires=[

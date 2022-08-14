@@ -12,6 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 """Defines the client object used to establish virtual pfSense shell connections."""
+__version__ = "2.0.4"
 
 import datetime
 import html
@@ -61,7 +62,7 @@ class PFClient:
         Provides the current version of pfsense vShell
         :return: (string) the current pfSense vShell version
         """
-        return "2.0.3"
+        return __version__
 
     def url(self):
         """

@@ -1,6 +1,7 @@
-[![PyPI](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/python-publish.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/python-publish.yml)
-[![CodeQL](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml)
+[![PyPI](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pypi.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pypi.yml)
+[![Test PyPI](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/test-pypi.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/test-pypi.yml)
 [![PyLint](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pylint.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pylint.yml)
+[![CodeQL](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml)
 
 # Introduction
 pfSense vShell is a command line tool and Python module that enables users to remotely enter shell commands on a pfSense
