@@ -28,17 +28,16 @@ def read(rel_path):
 
 def get_version(rel_path):
     """
-    Gets the current version of the package. If a .devrevision file exists, the file will be read and appended to the
-    current package version. This is used to ensure the setup version can always be unique for PyPI dev builds
-    triggered by CI/CD workflows.
+    Gets the current version of the package. If a __PFSENSE_VSHELL_DEVREVISION__ environment variable exists, it will
+    be read and appended to the current package version. This is used to ensure the setup version can always be unique
+    for PyPI dev builds triggered by CI/CD workflows.
     """
     # Variables
     revision = ""
 
-    # If a .devrevision file exists, this will append a development revision to the version
-    if os.path.exists(".devrevision"):
-        revision = "dev." + read(".devrevision").replace("\n", "")
-        print(revision)
+    # If a __PFSENSE_VSHELL_DEVREVISION__ environment variable exists, set it as the dev revision.
+    if "__PFSENSE_VSHELL_DEVREVISION__" in os.environ:
+        revision = "+dev." + os.environ.get("__PFSENSE_VSHELL_DEVREVISION__")
 
     # Otherwise, look for the version in the package.
     for line in read(rel_path).splitlines():

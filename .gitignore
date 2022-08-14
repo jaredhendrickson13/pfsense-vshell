@@ -5,4 +5,3 @@ build*
 *pfsense_vshell.egg*
 dist*
 venv*
-.devrevision
