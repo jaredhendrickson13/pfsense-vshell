@@ -37,7 +37,7 @@ def get_version(rel_path):
 
     # If a __PFSENSE_VSHELL_DEVREVISION__ environment variable exists, set it as the dev revision.
     if "__PFSENSE_VSHELL_DEVREVISION__" in os.environ:
-        revision = "+dev." + os.environ.get("__PFSENSE_VSHELL_DEVREVISION__")
+        revision = "dev." + os.environ.get("__PFSENSE_VSHELL_DEVREVISION__")
 
     # Otherwise, look for the version in the package.
     for line in read(rel_path).splitlines():
