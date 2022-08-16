@@ -65,6 +65,10 @@ class TestVShell(unittest.TestCase):
         non_pfsense_vshell.scheme = "http"
         self.assertFalse(non_pfsense_vshell.is_host_pfsense())
 
+    def test_has_dns_rebind_error(self):
+        """Ensures the 'has_dns_rebind_error' method successfully checks for DNS rebinds errors."""
+        self.assertFalse(self.vshell.has_dns_rebind_error())
+
     def test_run_command(self):
         """Ensure specific commands produce an expected output."""
         # Ensure working directory is pfSense webroot.
@@ -76,6 +80,57 @@ class TestVShell(unittest.TestCase):
         # Ensure executed commands are registered in the vshell history.
         self.assertIn("pwd", self.vshell.history)
         self.assertIn("whoami", self.vshell.history)
+
+    def test_version(self):
+        """Ensure the version method returns the correct version."""
+        self.assertEqual(self.vshell.version(), pfsense_vshell.__version__)
+
+    def test_url(self):
+        """Ensure the url method correctly formats the URL."""
+        self.assertEqual(
+            self.vshell.url(),
+            self.vshell.scheme + "://" + self.vshell.host + ":" + str(self.vshell.port)
+        )
+
+    def test_get_error(self):
+        """Ensure the __get_error__ method raises the error correctly."""
+        with self.assertRaises(pfsense_vshell.PFError):
+            self.vshell.__get_error__(1)
+
+    def test_has_host_errors(self):
+        """Ensure the __has_host_errors__ properly checks for any host errors."""
+        # Check that our main test target is correclty identified as having no errors
+        self.assertFalse(self.vshell.__has_host_errors__())
+
+        # Create a new test target that has bad authentication to ensure the method catches it
+        non_pfsense_vshell = copy.deepcopy(self.vshell)
+        non_pfsense_vshell.session.cookies.clear_session_cookies()
+        non_pfsense_vshell.username = "INVALID"
+        non_pfsense_vshell.password = "INVALID"
+        self.assertRaises(pfsense_vshell.PFError, non_pfsense_vshell.__has_host_errors__)
+
+        # Check if module correctly identifies non-pfSense host using a clone of the PFClient object
+        non_pfsense_vshell.username = self.vshell.username
+        non_pfsense_vshell.password = self.vshell.password
+        non_pfsense_vshell.host = "example.com"
+        non_pfsense_vshell.port = 80
+        non_pfsense_vshell.scheme = "http"
+        self.assertRaises(pfsense_vshell.PFError, non_pfsense_vshell.__has_host_errors__)
+
+    def test_log(self):
+        """Ensure the __log__ method logs events properly."""
+        self.vshell.__log__("TESTEVENT", "TESTMSG")
+
+        # Checks to ensure the message was actually logged.
+        with self.assertRaises(EOFError):
+            for log in self.vshell.log:
+                if "TESTEVENT" in log and "TESTMSG" in log:
+                    raise EOFError
+
+    def test_pferror_class(self):
+        """Tests the PFError exception class."""
+        with self.assertRaises(pfsense_vshell.PFError):
+            raise pfsense_vshell.PFError
 
 
 if __name__ == '__main__':
