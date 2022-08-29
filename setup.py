@@ -68,7 +68,7 @@ setup(
     install_requires=[
         "requests~=2.28.1",
         "urllib3~=1.26.10",
-        "pylint~=2.14.5"
+        "pylint>=2.14.5,<2.16.0"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
