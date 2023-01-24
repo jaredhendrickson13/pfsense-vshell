@@ -20,7 +20,7 @@ To uninstall:<br>
 
 ## Usage & Syntax
 ```
-usage: pfsense-vshell [-h] --host HOST [--virtual_shell] [--command COMMAND] --username USERNAME --password PASSWORD [--scheme {http,https}] [--port PORT] [--timeout TIMEOUT] [--shell_timeout SHELL_TIMEOUT] [--no_verify] [--version] [--verbose]
+usage: pfsense-vshell [-h] --host HOST [--virtual_shell] [--command COMMAND] --username USERNAME [--password PASSWORD] [--scheme {http,https}] [--port PORT] [--timeout TIMEOUT] [--shell_timeout SHELL_TIMEOUT] [--no_verify] [--version] [--verbose]
 ```
 
 | Command         | Shorthand | Required                              | Description                                                                                    | Example Usage           |
@@ -31,7 +31,7 @@ usage: pfsense-vshell [-h] --host HOST [--virtual_shell] [--command COMMAND] --u
 | --help          | -h        | No                                    | Display the help page                                                                          | --help                  |
 | --version       | -V        | No                                    | Display the current version                                                                    | --version               |
 | --username      | -u        | Yes (except with --help or --version) | Set the username to login with                                                                 | --username USERNAME     |
-| --password      | -p        | Yes (except with --help or --version) | Set the password to login with                                                                 | --password PASSWORD     |
+| --password      | -p        | No                                    | Set the password to login with. User will be prompted for a password if unspecified.           | --password PASSWORD     |
 | --port          | -P        | No                                    | Set the TCP port of pfSense's webConfigurator                                                  | --port PORT             |
 | --scheme        | -w        | No                                    | Set the HTTP protocol scheme. `http` or `https`                                                | --scheme SCHEME         |
 | --no_verify     | -k        | No                                    | Disable SSL certificate verification                                                           | --no_verify             |
