@@ -266,5 +266,10 @@ class PFClient:
         self.log.append(",".join([str(datetime.datetime.utcnow()), self.url(), self.username, event, msg]))
 
 
-class PFError(BaseException):
-    """Error object used by the PFVShell class"""
+class PFError(Exception):
+    """
+    Error object used by the PFVShell class
+    """
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
