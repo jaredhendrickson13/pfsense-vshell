@@ -18,6 +18,7 @@
 import argparse
 import sys
 import time
+import getpass
 import pfsense_vshell
 
 
@@ -225,7 +226,8 @@ class PFCLI:
         parser.add_argument(
             '--password', "-p",
             dest="password",
-            required=False if "--version" in sys.argv or "-V" in sys.argv else True,
+            required=False,
+            default=None,
             help='Set the password to use when authenticating',
         )
         parser.add_argument(
@@ -275,7 +277,12 @@ class PFCLI:
             help="Print verbose data"
         )
 
+        # Parse the arguments
         self.args = parser.parse_args()
+
+        # Prompt for a password if one was not specified and the version flag was not used
+        if self.args.password is None and not self.args.version:
+            self.args.password = getpass.getpass(f"Enter pfSense password for '{self.args.username}': ")
 
 
 # RUNTIME
