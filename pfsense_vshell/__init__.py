@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 """Defines the client object used to establish virtual pfSense shell connections."""
-__version__ = "2.0.4"
+__version__ = "2.0.5"
 
 import datetime
 import html
