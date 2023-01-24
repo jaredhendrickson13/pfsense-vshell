@@ -270,6 +270,9 @@ class PFError(Exception):
     """
     Error object used by the PFVShell class
     """
+    code = 1
+    message = "an unknown error has occurred"
+
     def __init__(self, code, message):
         self.code = code
         self.message = message

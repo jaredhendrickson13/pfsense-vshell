@@ -12,16 +12,17 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+"""The command line interface for pfsense-vshell."""
 
 # IMPORT MODULES #
 import argparse
 import sys
 import time
 import pfsense_vshell
-import pkg_resources
 
 
 class PFCLI:
+    """Class containing all methods necessary for CLI functionality."""
     def __init__(self):
         """
         Initializes the object at creation by converting arguments intto our PFClient object and running our CLI
@@ -165,6 +166,8 @@ class PFCLI:
         Sets criteria for arguments and parses them into our args property
         :return: (none) args property will be populated after running
         """
+        # Expressions can be better understood in this context as 'False if expression else True'
+        # pylint: disable=simplifiable-if-expression
 
         def port(value_string):
             """
@@ -176,7 +179,7 @@ class PFCLI:
 
             value = int(value_string)
             if value not in range(1, 65535):
-                raise argparse.ArgumentTypeError("%s is out of range, choose from [1-65535]" % value)
+                raise argparse.ArgumentTypeError(f"{value} is out of range, choose from [1-65535]")
             return value
 
         def timeout(value_string):
@@ -189,7 +192,7 @@ class PFCLI:
 
             value = int(value_string)
             if value not in range(0, 120):
-                raise argparse.ArgumentTypeError("%s is out of range, choose from [0-120]" % value)
+                raise argparse.ArgumentTypeError(f"{value} is out of range, choose from [0-120]")
             return value
 
         # Setup parser and define arguments
