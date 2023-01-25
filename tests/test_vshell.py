@@ -130,7 +130,7 @@ class TestVShell(unittest.TestCase):
     def test_pferror_class(self):
         """Tests the PFError exception class."""
         with self.assertRaises(pfsense_vshell.PFError):
-            raise pfsense_vshell.PFError
+            raise pfsense_vshell.PFError(1, "Test error message")
 
 
 if __name__ == '__main__':
