@@ -66,9 +66,9 @@ setup(
     scripts=['scripts/pfsense-vshell'],
     packages=["pfsense_vshell"],
     install_requires=[
-        "requests~=2.28.1",
-        "urllib3~=1.26.10",
-        "pylint~=2.14.5"
+        "requests>=2.28.1",
+        "urllib3>=1.26.10",
+        "pylint>=2.14.5"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

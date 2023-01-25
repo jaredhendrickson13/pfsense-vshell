@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 """Defines the client object used to establish virtual pfSense shell connections."""
-__version__ = "2.0.4"
+__version__ = "2.1.0"
 
 import datetime
 import html
@@ -266,5 +266,14 @@ class PFClient:
         self.log.append(",".join([str(datetime.datetime.utcnow()), self.url(), self.username, event, msg]))
 
 
-class PFError(BaseException):
-    """Error object used by the PFVShell class"""
+class PFError(Exception):
+    """
+    Error object used by the PFVShell class
+    """
+    code = 1
+    message = "an unknown error has occurred"
+
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+        super().__init__()
