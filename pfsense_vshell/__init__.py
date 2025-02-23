@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 """Defines the client object used to establish virtual pfSense shell connections."""
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 import datetime
 import html
@@ -23,10 +23,20 @@ import urllib3
 
 class PFClient:
     """Client object that facilitates controlling the virtual shell."""
+
     # Allow current number of instance attributes, they are needed to allow configurable connections
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, host, username, password, port=443, scheme="https", timeout=30, verify=True):
+    def __init__(
+        self,
+        host,
+        username,
+        password,
+        port=443,
+        scheme="https",
+        timeout=30,
+        verify=True,
+    ):
         """
         Initializes the object at creation
         :param host: (string) the IP or hostname of the remote pfSense host
@@ -38,7 +48,7 @@ class PFClient:
         :param verify: (bool) true to enable certificate verification, false to disable. Defaults to true.
         """
         # Allow current number of arguments, it does not affect readability
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
 
         # Set properties using parameters
         self.session = requests.Session()
@@ -82,7 +92,11 @@ class PFClient:
         self.__has_host_errors__()
 
         # Make our HTTP request.
-        payload = {"__csrf_magic": self.get_csrf_token("/diag_command.php"), "txtCommand": cmd, "submit": "EXEC"}
+        payload = {
+            "__csrf_magic": self.get_csrf_token("/diag_command.php"),
+            "txtCommand": cmd,
+            "submit": "EXEC",
+        }
         req = self.request("/diag_command.php", method="POST", data=payload)
 
         # Write the command executed to the vShell history and log the action.
@@ -108,7 +122,13 @@ class PFClient:
         # Try to make our HTTP request, handle errors accordingly
         try:
             session = self.session
-            req = session.request(method, self.url() + uri, data=data, timeout=self.timeout, verify=self.verify)
+            req = session.request(
+                method,
+                self.url() + uri,
+                data=data,
+                timeout=self.timeout,
+                verify=self.verify,
+            )
             session.close()
             self.last_request = req
             self.__log__("request", str(req.status_code) + " " + method + " " + uri)
@@ -140,15 +160,18 @@ class PFClient:
             "__csrf_magic": self.get_csrf_token("/index.php"),
             "usernamefld": self.username,
             "passwordfld": self.password,
-            "login": "Sign In"
+            "login": "Sign In",
         }
 
         # Only authenticate if we are not already authenticated
-        if "class=\"fa fa-sign-out\"" not in pre_auth_req.text:
+        if 'class="fa fa-sign-out"' not in pre_auth_req.text:
             req = self.request("/index.php", method="POST", data=payload)
 
             # Attempt to authenticate
-            if "username or Password incorrect" not in req.text and "class=\"fa fa-sign-out\"" in req.text:
+            if (
+                "username or Password incorrect" not in req.text
+                and 'class="fa fa-sign-out"' in req.text
+            ):
                 self.__log__("authenticate", "success")
                 return True
             # Support first time logings where wizard is triggered
@@ -176,7 +199,13 @@ class PFClient:
         # Parse CSRF token if it was found
         if "sid:" in csrf_resp.text:
             csrf = "sid:"
-            csrf += csrf_resp.text.split("sid:")[1].split(";")[0].replace(" ", "").replace("\n", "").replace("\"", "")
+            csrf += (
+                csrf_resp.text.split("sid:")[1]
+                .split(";")[0]
+                .replace(" ", "")
+                .replace("\n", "")
+                .replace('"', "")
+            )
             csrf_token = csrf if len(csrf) is csrf_token_length else ""
 
         # Return the valid CSRF token, or empty string if it could not be determined.
@@ -206,14 +235,29 @@ class PFClient:
 
         # List of platform dependent key words to check for
         check_items = [
-            "pfSense", "pfsense.org", "Login to pfSense", "pfsense-logo", "pfSenseHelpers",
-            "netgate.com", "__csrf_magic", "ESF", "Netgate", "Rubicon Communications, LLC",
-            "Electric Sheep Fencing LLC", "https://pfsense.org/license", "CsrfMagic",
-            "csrfMagicToken", "/csrf/csrf-magic.js", "wizard.php", "/css/pfSense.css"
+            "pfSense",
+            "pfsense.org",
+            "Login to pfSense",
+            "pfsense-logo",
+            "pfSenseHelpers",
+            "netgate.com",
+            "__csrf_magic",
+            "ESF",
+            "Netgate",
+            "Rubicon Communications, LLC",
+            "Electric Sheep Fencing LLC",
+            "https://pfsense.org/license",
+            "CsrfMagic",
+            "csrfMagicToken",
+            "/csrf/csrf-magic.js",
+            "wizard.php",
+            "/css/pfSense.css",
         ]
         # Loop through our list and add up a confidence score
         for item in check_items:
-            platform_confidence = platform_confidence + 10 if item in resp else platform_confidence
+            platform_confidence = (
+                platform_confidence + 10 if item in resp else platform_confidence
+            )
 
         return platform_confidence > 50
 
@@ -251,7 +295,7 @@ class PFClient:
             11: "certificate verification failed",
             12: "could not connect to host at '" + self.url() + "'",
             13: "host at '" + self.url() + "' does not appear to be running pfSense",
-            14: "DNS rebind error detected"
+            14: "DNS rebind error detected",
         }
 
         raise PFError(code, errors.get(code, 1))
@@ -263,13 +307,18 @@ class PFClient:
         :param msg: (string) a descriptive message detailing the log event
         :return: (none) a new item will be appended to the log property of the object
         """
-        self.log.append(",".join([str(datetime.datetime.utcnow()), self.url(), self.username, event, msg]))
+        self.log.append(
+            ",".join(
+                [str(datetime.datetime.utcnow()), self.url(), self.username, event, msg]
+            )
+        )
 
 
 class PFError(Exception):
     """
     Error object used by the PFVShell class
     """
+
     code = 1
     message = "an unknown error has occurred"
 
