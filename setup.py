@@ -48,28 +48,29 @@ def get_version(rel_path):
     raise RuntimeError("Unable to find version string.")
 
 
-def get_readme():
+def read_readme():
     """Reads the README.md for this repository to include in package distributions."""
     return read("README.md")
 
 
+def read_requirements():
+    """Opens and read the requirements.txt file for this repo."""
+    with open('requirements.txt', 'r', encoding='utf-8') as requirements_file:
+        return list(filter(None, requirements_file.read().split("\n")))
+
 setup(
     name='pfsense-vshell',
     author='Jared Hendrickson',
-    author_email='jaredhendrickson13@gmail.com',
+    author_email='github@jaredhendrickson.com',
     url="https://github.com/jaredhendrickson13/pfsense-vshell",
     license="Apache-2.0",
     description="A command line tool to run remote shell commands on pfSense without SSH.",
-    long_description=get_readme(),
+    long_description=read_readme(),
     long_description_content_type="text/markdown",
     version=get_version("pfsense_vshell/__init__.py"),
     scripts=['scripts/pfsense-vshell'],
     packages=["pfsense_vshell"],
-    install_requires=[
-        "requests>=2.28.1",
-        "urllib3>=1.26.10",
-        "pylint>=2.14.5"
-    ],
+    install_requires=read_requirements(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
