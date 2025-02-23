@@ -46,13 +46,25 @@ jobs:
         /usr/local/bin/VBoxManage startvm pfSense-2.7.2-RELEASE --type headless
         sleep 5
 
+    - name: Setup virtual environment
+      run: |
+        python3 -m venv venv
+
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        source venv/bin/activate
+        python3 -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
 
     - name: Run tests
       run: |
-        PFSENSE_VSHELL_HOST=pfSense-2.7.2-RELEASE.jaredhendrickson.com python -m coverage run --module unittest tests/test_vshell.py
-        python -m coverage report --show-missing --fail-under 90
+        source venv/bin/activate
+        PFSENSE_VSHELL_HOST=pfSense-2.7.2-RELEASE.jaredhendrickson.com python3 -m coverage run --module unittest tests/test_vshell.py
+        python3 -m coverage report --show-missing --fail-under 90
+
+    - name: Tear down pfSense VM and virtual environment
+      if: ${{ always() }}
+      run: |
+        /usr/local/bin/VBoxManage controlvm pfSense-2.7.2-RELEASE poweroff || true
+        rm -rf venv
