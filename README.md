@@ -1,5 +1,5 @@
-[![PyPI](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pypi.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pypi.yml)
-[![PyLint](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pylint.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/pylint.yml)
+[![Quality](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/quality.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/quality.yml)
+[![Release](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/release.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/release.yml)
 [![CodeQL](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml/badge.svg)](https://github.com/jaredhendrickson13/pfsense-vshell/actions/workflows/codeql.yml)
 
 # Introduction
