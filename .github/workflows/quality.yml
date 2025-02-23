@@ -15,7 +15,7 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
@@ -37,7 +37,7 @@ jobs:
     runs-on: self-hosted
     needs: [check_black, check_pylint]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup pfSense VM
       run: |
