@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 """Defines the client object used to establish virtual pfSense shell connections."""
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 import datetime
 import html
@@ -38,7 +38,7 @@ class PFClient:
         :param verify: (bool) true to enable certificate verification, false to disable. Defaults to true.
         """
         # Allow current number of arguments, it does not affect readability
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
 
         # Set properties using parameters
         self.session = requests.Session()
