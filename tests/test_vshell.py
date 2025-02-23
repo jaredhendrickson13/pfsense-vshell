@@ -35,7 +35,7 @@ class TestVShell(unittest.TestCase):
             port=int(os.environ.get("PFSENSE_VSHELL_PORT", 443)),
             scheme=os.environ.get("PFSENSE_VSHELL_SCHEME", "https"),
             timeout=int(os.environ.get("PFSENSE_VSHELL_TIMEOUT", 30)),
-            verify=bool(os.environ.get("PFSENSE_VSHELL_VERIFY", False))
+            verify=bool(os.environ.get("PFSENSE_VSHELL_VERIFY", False)),
         )
 
     def test_get_csrf_token(self):
@@ -89,7 +89,7 @@ class TestVShell(unittest.TestCase):
         """Ensure the url method correctly formats the URL."""
         self.assertEqual(
             self.vshell.url(),
-            self.vshell.scheme + "://" + self.vshell.host + ":" + str(self.vshell.port)
+            self.vshell.scheme + "://" + self.vshell.host + ":" + str(self.vshell.port),
         )
 
     def test_get_error(self):
@@ -107,7 +107,9 @@ class TestVShell(unittest.TestCase):
         non_pfsense_vshell.session.cookies.clear_session_cookies()
         non_pfsense_vshell.username = "INVALID"
         non_pfsense_vshell.password = "INVALID"
-        self.assertRaises(pfsense_vshell.PFError, non_pfsense_vshell.__has_host_errors__)
+        self.assertRaises(
+            pfsense_vshell.PFError, non_pfsense_vshell.__has_host_errors__
+        )
 
         # Check if module correctly identifies non-pfSense host using a clone of the PFClient object
         non_pfsense_vshell.username = self.vshell.username
@@ -115,7 +117,9 @@ class TestVShell(unittest.TestCase):
         non_pfsense_vshell.host = "example.com"
         non_pfsense_vshell.port = 80
         non_pfsense_vshell.scheme = "http"
-        self.assertRaises(pfsense_vshell.PFError, non_pfsense_vshell.__has_host_errors__)
+        self.assertRaises(
+            pfsense_vshell.PFError, non_pfsense_vshell.__has_host_errors__
+        )
 
     def test_log(self):
         """Ensure the __log__ method logs events properly."""
@@ -133,5 +137,5 @@ class TestVShell(unittest.TestCase):
             raise pfsense_vshell.PFError(1, "Test error message")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
