@@ -192,8 +192,8 @@ class PFCLI:
             """
 
             value = int(value_string)
-            if value not in range(0, 120):
-                raise argparse.ArgumentTypeError(f"{value} is out of range, choose from [0-120]")
+            if value not in range(0, 301):
+                raise argparse.ArgumentTypeError(f"{value} is out of range, choose from [0-300]")
             return value
 
         # Setup parser and define arguments
