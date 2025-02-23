@@ -39,11 +39,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.12'
-
     - name: Setup pfSense VM
       run: |
         /usr/local/bin/VBoxManage controlvm pfSense-2.7.2-RELEASE poweroff || true
