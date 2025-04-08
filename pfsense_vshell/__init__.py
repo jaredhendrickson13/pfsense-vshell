@@ -1,4 +1,4 @@
-# Copyright 2022 Jared Hendrickson
+# Copyright 2025 Jared Hendrickson
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 """Defines the client object used to establish virtual pfSense shell connections."""
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 
 import datetime
 import html
@@ -164,17 +164,17 @@ class PFClient:
         }
 
         # Only authenticate if we are not already authenticated
-        if 'class="fa fa-sign-out"' not in pre_auth_req.text:
+        if '<a href="/index.php?logout" usepost>' not in pre_auth_req.text:
             req = self.request("/index.php", method="POST", data=payload)
 
             # Attempt to authenticate
             if (
-                "username or Password incorrect" not in req.text
-                and 'class="fa fa-sign-out"' in req.text
+                "Username or Password incorrect" not in req.text
+                and '<a href="/index.php?logout" usepost>' in req.text
             ):
                 self.__log__("authenticate", "success")
                 return True
-            # Support first time logings where wizard is triggered
+            # Support first time logins where wizard is triggered
             if "<p>One moment while the initial setup wizard starts." in req.text:
                 self.__log__("authenticate", "success")
                 return True
