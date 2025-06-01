@@ -38,7 +38,7 @@ jobs:
     needs: [check_black, check_pylint]
     strategy:
       matrix:
-        pfsense-version: ["pfSense-2.7.2-RELEASE", "pfSense-2.8.0-BETA"]
+        pfsense-version: ["pfSense-2.7.2-RELEASE", "pfSense-2.8.0-RELEASE"]
     steps:
     - uses: actions/checkout@v4
 
