@@ -1,4 +1,4 @@
 black~=25.1.0
 pylint~=3.3.7
-coverage~=7.8.2
+coverage~=7.9.2
 setuptools~=80.9.0
