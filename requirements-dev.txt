@@ -1,4 +1,4 @@
 black~=26.5.1
-pylint~=4.0.6
-coverage~=7.15.2
-setuptools~=83.0.0
+pylint~=4.0.8
+coverage~=7.16.0
+setuptools~=84.0.0
